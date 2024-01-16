@@ -20,6 +20,8 @@ Lynn Wu <br>
 y.wu@duke.edu <br>
 Office hours: TBD
 
+**Instructor** <br>
+Julia Kagiliery
 
 **Syllabus** <br>
 
