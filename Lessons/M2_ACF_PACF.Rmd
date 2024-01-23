@@ -72,9 +72,9 @@ str(raw_inflow_data)
 The data sets we will work with will be indexed by time, remember we are doing TIME series analysis. After importing your data set make sure that you have your dates right. For this specific inflow file our date is spread in two different columns. The first one is the month and the second the year. The best package to handle date conversion in R is lubridate. Let's see how we can use lubridate functions to combine those two columns into one date object. Note that this is only one example for our particular data set, for more info on lubridate function refer to tho this file [file](https://evoldyn.gitlab.io/evomics-2018/ref-sheets/R_lubridate.pdf) and "M1_Intro_DateObjects.Rmd" in our lessons folder.
 
 ```{r}
-#using package lubridate
-my_date <- paste(raw_inflow_data[,1],raw_inflow_data[,2],sep="-")
-my_date <- my(my_date)  #function my from package lubridate
+#using package lubridate (makes it into an object)
+my_date <- paste(raw_inflow_data[,1],raw_inflow_data[,2],sep="-") # [,1] ccopies the first column only
+my_date <- my(my_date)  #function my from package lubridate, my means month year
 head(my_date)
 #add that to inflow_data 
 inflow_data <- cbind(my_date,raw_inflow_data[,3:5]) #cbind stands for column bind
@@ -88,7 +88,9 @@ A plot of observed values over time is the first thing you do to start understan
 
 ```{r}
 #using package ggplot2
-ggplot()
+ggplot(inflow_data,aes(x=my_date, y = HP1)) +
+  geom_line(aes(y=HP1),color="blue") +
+  geom_line(aes(y=HP2),color="black")
 
 #adding two time series to the same plot
 
@@ -102,7 +104,7 @@ In this course we will also use *autoplot()* which is a ggplot() for time series
 Many of the functions we will use require a time series object. You can transform your data in a time series using the function *ts()*. Only the columns with reservoir inflow data should be transformed, not the ones with month and year. Your ts object is not a data frame, but like I said we will need it as a ts for some function we will explore in future scripts.
 
 ```{r}
-ts_inflow_data <- #####
+ts_inflow_data <-ts(inflow_data[,"HP1"], start =c(1931,1), frequency=12)
 ts_inflow_data
 
 ```
@@ -126,17 +128,20 @@ autoplot(ts_inflow_data) +
 There are multiple ways to get acf and pacf plots in R. The default package "stats" have the functions acf() and pacf(). Another option is with the functions Acf() and Pacf() from package "forecast". Package forecast is not a default package. So you need to install and load it on the beginning of your scripts. 
 
 ```{r acf}
-# Option 1: The function acf() and pacf() is from package "stats"
-HP1_acf=
+# Option 1: The function acf() and pacf() is from package "stats", acf() is the auto corelation function
+HP1_acf <- acf(ts_inflow_data, lag.max=40)
 
-HP1_pacf=
+
+HP1_pacf <- pacf(ts_inflow_data, lag.max=40)
 
 #Option 2: Computing ACF and PACF with package "forecast"
 
 #The next line will output a plot since we have plot=TRUE and also store the acf values in the object
-HP1_acf=
+HP1_acf= acf(ts_inflow_data, lag.max=40)
 
-HP1_pacf=
+
+HP1_pacf <- pacf(ts_inflow_data, lag.max=40)
   
 ```
+
 
