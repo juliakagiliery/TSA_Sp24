@@ -33,8 +33,9 @@ library(forecast)
 Consider the data provided in the spreadsheet "Table_10.1_Renewable_Energy_Production_and_Consumption_by_Source.xlsx" on our **Data** folder. The data comes from the US Energy Information and Administration and corresponds to the December 2023 Monthly Energy Review. The spreadsheet is ready to be used. You will also find a $.csv$ version of the data "Table_10.1_Renewable_Energy_Production_and_Consumption_by_Source-Edit.csv". You may use the function $read.table()$ to import the $.csv$ data in R. Or refer to the file "M2_ImportingData_CSV_XLSX.Rmd" in our Lessons folder for functions that are better suited for importing the $.xlsx$.
 
 ```{r}
-data <- read.csv("Data/Table_10.1_Renewable_Energy_Production_and_Consumption_by_Source.csv")
-data
+library(readxl)
+energy_data <- read_excel(path="~/Julia_Kagiliery_TSA_Sp24/Data/Table_10.1_Renewable_Energy_Production_and_Consumption_by_Source.xlsx",skip = 12, sheet="Monthly Data",col_names=FALSE) 
+energy_data
 ```
 
 
@@ -42,15 +43,21 @@ data
 You will work only with the following columns: Total Biomass Energy Production, Total Renewable Energy Production, Hydroelectric Power Consumption. Create a data frame structure with these three time series only. Use the command head() to verify your data.
 
 ```{r}
-
+energy_data1 <- energy_data[,4:6]
 ```
 
+```{r}
+colnames(energy_data1) <- c('Total Biomass Energy Production', 'Total Renewable Energy Production', 'Hydroelectric Power Consumption')
+
+head(energy_data1)
+```
 
 ## Question 2
 Transform your data frame in a time series object and specify the starting point and frequency of the time series using the function ts().
 
 ```{r}
-
+tsenergy <- energy_data1 |>
+  ts(start = 1, frequency = 12)
 ```
 
 
