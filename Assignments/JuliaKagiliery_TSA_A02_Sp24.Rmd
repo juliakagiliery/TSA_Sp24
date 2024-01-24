@@ -25,6 +25,8 @@ R packages needed for this assignment:"forecast","tseries", and "dplyr". Install
 library(dplyr)
 library(tseries)
 library(forecast) 
+library(lubridate)
+library(ggplot2)
 ```
 
 
@@ -37,7 +39,6 @@ library(readxl)
 energy_data <- read_excel(path="~/Julia_Kagiliery_TSA_Sp24/Data/Table_10.1_Renewable_Energy_Production_and_Consumption_by_Source.xlsx",skip = 12, sheet="Monthly Data",col_names=FALSE) 
 energy_data
 ```
-
 
 ## Question 1
 You will work only with the following columns: Total Biomass Energy Production, Total Renewable Energy Production, Hydroelectric Power Consumption. Create a data frame structure with these three time series only. Use the command head() to verify your data.
@@ -57,26 +58,35 @@ Transform your data frame in a time series object and specify the starting point
 
 ```{r}
 tsenergy <- energy_data1 |>
-  ts(start = 1, frequency = 12)
+  ts(start = c(1973,1), frequency = 12)
 ```
-
 
 ## Question 3
 Compute mean and standard deviation for these three series.
 
 ```{r}
-
+library(skimr)
+skim(tsenergy) 
 ```
-
+The mean for total biomass energy production is 279.80457 and the standard deviation is 92.66504.
+The mean for total rennewable energy production is 395.72134 and the standard deviation is 137.79520.
+The mean for hydroelectric power consumption is 79.73071 and the standard deviation is 49.022
 
 ## Question 4
 Display and interpret the time series plot for each of these variables. Try to make your plot as informative as possible by writing titles, labels, etc. For each plot add a horizontal line at the mean of each series in a different color.
 
 ```{r}
-
+autoplot(tsenergy) +
+  xlab("Year") +
+  ylab("Energy (Trillion BTUs)") +
+  labs(color="Energy Type", title="Energy Production and Constumption 1973 to 2023", subtitle ="Note that horizontal lines indicate mean.") +
+  scale_color_manual(values = c("Total Biomass Energy Production" = "lightgreen", "Total Renewable Energy Production"= "purple", "Hydroelectric Power Consumption" = "lightblue")) +
+                       geom_hline(yintercept=279.80457, col="lightgreen") +
+  geom_hline(yintercept=395.72134, col="purple") +
+  geom_hline(yintercept=79.73071, col="lightblue") 
 ```
 
-
+ 
 ## Question 5
 Compute the correlation between these three series. Are they significantly correlated? Explain your answer.
 
