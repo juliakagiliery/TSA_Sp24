@@ -1,7 +1,7 @@
 ---
 title: "ENV 790.30 - Time Series Analysis for Energy Data | Spring 2024"
 subtitle: "Assignment 2 - Due date 02/25/24"
-author: "Student Name"
+author: "Julia Kagiliery"
 output: pdf_document
 geometry: margin=2.54cm
 ---
@@ -22,7 +22,9 @@ R packages needed for this assignment:"forecast","tseries", and "dplyr". Install
 
 ```{r}
 #Load/install required package here
-
+library(dplyr)
+library(tseries)
+library(forecast) 
 ```
 
 
@@ -31,8 +33,8 @@ R packages needed for this assignment:"forecast","tseries", and "dplyr". Install
 Consider the data provided in the spreadsheet "Table_10.1_Renewable_Energy_Production_and_Consumption_by_Source.xlsx" on our **Data** folder. The data comes from the US Energy Information and Administration and corresponds to the December 2023 Monthly Energy Review. The spreadsheet is ready to be used. You will also find a $.csv$ version of the data "Table_10.1_Renewable_Energy_Production_and_Consumption_by_Source-Edit.csv". You may use the function $read.table()$ to import the $.csv$ data in R. Or refer to the file "M2_ImportingData_CSV_XLSX.Rmd" in our Lessons folder for functions that are better suited for importing the $.xlsx$.
 
 ```{r}
-#Importing data set
-
+data <- read.csv("Data/Table_10.1_Renewable_Energy_Production_and_Consumption_by_Source.csv")
+data
 ```
 
 
