@@ -215,6 +215,7 @@ default packages.\textbackslash{}
 \begin{Shaded}
 \begin{Highlighting}[]
 \FunctionTok{library}\NormalTok{(ggplot2)}
+\FunctionTok{library}\NormalTok{(tinytex)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -446,12 +447,69 @@ series in a different color.
 Compute the correlation between these three series. Are they
 significantly correlated? Explain your answer.
 
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{tsenergy }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{cor}\NormalTok{() }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{print}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                                   Total Biomass Energy Production
+## Total Biomass Energy Production                        1.00000000
+## Total Renewable Energy Production                      0.97074621
+## Hydroelectric Power Consumption                       -0.09656318
+##                                   Total Renewable Energy Production
+## Total Biomass Energy Production                         0.970746212
+## Total Renewable Energy Production                       1.000000000
+## Hydroelectric Power Consumption                        -0.001768629
+##                                   Hydroelectric Power Consumption
+## Total Biomass Energy Production                      -0.096563177
+## Total Renewable Energy Production                    -0.001768629
+## Hydroelectric Power Consumption                       1.000000000
+\end{verbatim}
+
+It appears as though total biomass energy production and total renewable
+energy production are strongly positively corelated as they have a
+correlation coefficient of 0.97075. However, these two are not
+correlated to hydroelectric power consumption as those coefficents are
+(in magnitude) lower than 0.7 (about where I would draw the line at
+taking strong conclusions about correlation).
+
 \hypertarget{question-6}{%
 \subsection{Question 6}\label{question-6}}
 
 Compute the autocorrelation function from lag 1 up to lag 40 for these
 three variables. What can you say about these plots? Do the three of
 them have the same behavior?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{tsenergy\_biomass }\OtherTok{\textless{}{-}}\NormalTok{ tsenergy[,}\DecValTok{1}\NormalTok{] }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{Acf}\NormalTok{(}\AttributeTok{lag.max =} \DecValTok{40}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{JuliaKagiliery_TSA_A02_Sp24_files/figure-latex/unnamed-chunk-9-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{tsenergy\_renewable }\OtherTok{\textless{}{-}}\NormalTok{ tsenergy[,}\DecValTok{2}\NormalTok{] }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{Acf}\NormalTok{(}\AttributeTok{lag.max =} \DecValTok{40}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{JuliaKagiliery_TSA_A02_Sp24_files/figure-latex/unnamed-chunk-10-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{tsenergy\_hydro }\OtherTok{\textless{}{-}}\NormalTok{ tsenergy[,}\DecValTok{3}\NormalTok{] }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{Acf}\NormalTok{(}\AttributeTok{lag.max =} \DecValTok{40}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{JuliaKagiliery_TSA_A02_Sp24_files/figure-latex/unnamed-chunk-11-1.pdf}
 
 \hypertarget{question-7}{%
 \subsection{Question 7}\label{question-7}}

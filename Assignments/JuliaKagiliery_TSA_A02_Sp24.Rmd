@@ -27,6 +27,7 @@ library(tseries)
 library(forecast) 
 library(lubridate)
 library(ggplot2)
+library(tinytex)
 ```
 
 
@@ -101,9 +102,16 @@ It appears as though total biomass energy production and total renewable energy 
 Compute the autocorrelation function from lag 1 up to lag 40 for these three variables. What can you say about these plots? Do the three of them have the same behavior?
 
 ```{r}
-tsenergy |>
-  acf()
-
+tsenergy_biomass <- tsenergy[,1] |>
+  Acf(lag.max = 40)
+```
+```{r}
+tsenergy_renewable <- tsenergy[,2] |>
+  Acf(lag.max = 40)
+```
+```{r}
+tsenergy_hydro <- tsenergy[,3] |>
+  Acf(lag.max = 40)
 ```
 
 
