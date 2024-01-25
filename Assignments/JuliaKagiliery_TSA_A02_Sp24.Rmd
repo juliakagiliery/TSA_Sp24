@@ -91,14 +91,18 @@ autoplot(tsenergy) +
 Compute the correlation between these three series. Are they significantly correlated? Explain your answer.
 
 ```{r}
-
+tsenergy |>
+  cor() |>
+  print()
 ```
-
+It appears as though total biomass energy production and total renewable energy production are strongly positively corelated as they have a correlation coefficient of 0.97075. However, these two are not correlated to hydroelectric power consumption as those coefficents are (in magnitude) lower than 0.7 (about where I would draw the line at taking strong conclusions about correlation).
 
 ## Question 6
 Compute the autocorrelation function from lag 1 up to lag 40 for these three variables. What can you say about these plots? Do the three of them have the same behavior?
 
 ```{r}
+tsenergy |>
+  acf()
 
 ```
 
