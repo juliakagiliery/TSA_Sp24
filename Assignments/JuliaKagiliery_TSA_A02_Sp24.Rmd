@@ -1,8 +1,12 @@
 ---
 title: "ENV 790.30 - Time Series Analysis for Energy Data | Spring 2024"
-subtitle: "Assignment 2 - Due date 02/25/24"
 author: "Julia Kagiliery"
-output: pdf_document
+subtitle: "Assignment 2 - Due date 02/25/24"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+  word_document: default
 geometry: margin=2.54cm
 ---
 
@@ -18,7 +22,7 @@ When you have completed the assignment, **Knit** the text and code into a single
 
 ## R packages
 
-R packages needed for this assignment:"forecast","tseries", and "dplyr". Install these packages, if you haven't done yet. Do not forget to load them before running your script, since they are NOT default packages.\\
+R packages needed for this assignment:"forecast","tseries", and "dplyr". Install these packages, if you haven't done yet. Do not forget to load them before running your script, since they are NOT default packages.
 
 ```{r}
 #Load/install required package here
@@ -30,10 +34,7 @@ library(ggplot2)
 library(tinytex)
 ```
 
-```{r}
-xfun::session_info('rmarkdown')
-tinytex::tinytex_root()
-```
+
 
 
 ## Data set information  
