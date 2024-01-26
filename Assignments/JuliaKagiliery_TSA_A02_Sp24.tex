@@ -433,12 +433,19 @@ series in a different color.
   \FunctionTok{labs}\NormalTok{(}\AttributeTok{color=}\StringTok{"Energy Type"}\NormalTok{, }\AttributeTok{title=}\StringTok{"Energy Production and Constumption 1973 to 2023"}\NormalTok{, }\AttributeTok{subtitle =}\StringTok{"Note that horizontal lines indicate mean."}\NormalTok{) }\SpecialCharTok{+}
   \FunctionTok{scale\_color\_manual}\NormalTok{(}\AttributeTok{values =} \FunctionTok{c}\NormalTok{(}\StringTok{"Total Biomass Energy Production"} \OtherTok{=} \StringTok{"lightgreen"}\NormalTok{, }\StringTok{"Total Renewable Energy Production"}\OtherTok{=} \StringTok{"purple"}\NormalTok{, }\StringTok{"Hydroelectric Power Consumption"} \OtherTok{=} \StringTok{"lightblue"}\NormalTok{)) }\SpecialCharTok{+}
                        \FunctionTok{geom\_hline}\NormalTok{(}\AttributeTok{yintercept=}\FloatTok{279.80457}\NormalTok{, }\AttributeTok{col=}\StringTok{"lightgreen"}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{geom\_hline}\NormalTok{(}\AttributeTok{yintercept=}\FloatTok{395.72134}\NormalTok{, }\AttributeTok{col=}\StringTok{"purple"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_hline}\NormalTok{(}\AttributeTok{yintercept=} \FloatTok{395.72134}\NormalTok{, }\AttributeTok{col=}\StringTok{"purple"}\NormalTok{) }\SpecialCharTok{+}
   \FunctionTok{geom\_hline}\NormalTok{(}\AttributeTok{yintercept=}\FloatTok{79.73071}\NormalTok{, }\AttributeTok{col=}\StringTok{"lightblue"}\NormalTok{) }
 \end{Highlighting}
 \end{Shaded}
 
 \includegraphics{JuliaKagiliery_TSA_A02_Sp24_files/figure-latex/unnamed-chunk-7-1.pdf}
+The hydroelectric power consumption appears to oscilate around it's own
+mean which leads me to belive that the data is possibly seasonal. Both
+the total biomass production and the renewable energy production are
+increasing over time so it is a touch more difficult to conjecture based
+on these plots alone. No matter what, plots should not be used in
+isolation to draw conclusions, further statistical analysis is
+warranted.
 
 \hypertarget{question-5}{%
 \subsection{Question 5}\label{question-5}}
@@ -483,6 +490,18 @@ Compute the autocorrelation function from lag 1 up to lag 40 for these
 three variables. What can you say about these plots? Do the three of
 them have the same behavior?
 
+These plot reflect something about the trends in the data between the
+relatively long time lags (that it the lag is cumulative in that more
+than just the proevious time point are accounted for). The first two
+plots seem to reflect a similar behavior in that these larger lag times
+do not best fit the data because there is some fundamental change within
+that lag (the upward trend). Hence, it seems like we might need to
+remove a trend before evaluating seasonality. The third plot looks a
+little different in that there seems to be a sinosoidal-type behavior,
+perhaps indicating a different relationship with the longer lag time,
+that is maybe there is less of a trend and more seasonaility behind that
+particular time series.
+
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{tsenergy[,}\DecValTok{1}\NormalTok{] }\SpecialCharTok{|\textgreater{}}
@@ -515,6 +534,13 @@ them have the same behavior?
 
 Compute the partial autocorrelation function from lag 1 to lag 40 for
 these three variables. How these plots differ from the ones in Q6?
+
+The PACF looks different here because it accounts for a different lag.
+That is, in PACF lags before the previous one are ignored so the next
+time point is viewed only by the one immediately prior. These plots look
+far more similar because they ignore the long cumulative trends and
+hence tell us a bit more about exclusively the seasonaility. All three
+plots seem to demonstarte a similar oscillating seasonaility.
 
 \begin{Shaded}
 \begin{Highlighting}[]

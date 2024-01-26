@@ -3,10 +3,10 @@ title: "ENV 790.30 - Time Series Analysis for Energy Data | Spring 2024"
 author: "Julia Kagiliery"
 subtitle: "Assignment 2 - Due date 02/25/24"
 output:
-  pdf_document: default
+  word_document: default
   html_document:
     df_print: paged
-  word_document: default
+  pdf_document: default
 geometry: margin=2.54cm
 ---
 
@@ -33,9 +33,6 @@ library(lubridate)
 library(ggplot2)
 library(tinytex)
 ```
-
-
-
 
 ## Data set information  
 
@@ -88,10 +85,10 @@ autoplot(tsenergy) +
   labs(color="Energy Type", title="Energy Production and Constumption 1973 to 2023", subtitle ="Note that horizontal lines indicate mean.") +
   scale_color_manual(values = c("Total Biomass Energy Production" = "lightgreen", "Total Renewable Energy Production"= "purple", "Hydroelectric Power Consumption" = "lightblue")) +
                        geom_hline(yintercept=279.80457, col="lightgreen") +
-  geom_hline(yintercept=395.72134, col="purple") +
+  geom_hline(yintercept= 395.72134, col="purple") +
   geom_hline(yintercept=79.73071, col="lightblue") 
 ```
-
+The hydroelectric power consumption appears to oscilate around it's own mean which leads me to belive that the data is possibly seasonal. Both the total biomass production and the renewable energy production are increasing over time so it is a touch more difficult to conjecture based on these plots alone. No matter what, plots should not be used in isolation to draw conclusions, further statistical analysis is warranted. 
  
 ## Question 5
 Compute the correlation between these three series. Are they significantly correlated? Explain your answer.
@@ -105,6 +102,10 @@ It appears as though total biomass energy production and total renewable energy 
 
 ## Question 6
 Compute the autocorrelation function from lag 1 up to lag 40 for these three variables. What can you say about these plots? Do the three of them have the same behavior?
+
+These plot reflect something about the trends in the data between the relatively long time lags (that it the lag is cumulative in that more than just the proevious time point are accounted for). The first two plots seem to reflect a similar behavior in that these larger lag times do not best fit the data because there is some fundamental change within that lag (the upward trend). Hence, it seems like we might need to remove a trend before evaluating seasonality. The third plot looks a little different in that there seems to be a sinosoidal-type behavior, perhaps indicating a different relationship with the longer lag time, that is maybe there is less of a trend and more seasonaility behind that particular time series. 
+
+
 
 ```{r}
 tsenergy[,1] |>
@@ -122,6 +123,8 @@ tsenergy[,3] |>
 
 ## Question 7
 Compute the partial autocorrelation function from lag 1 to lag 40 for these three variables. How these plots differ from the ones in Q6?
+
+The PACF looks different here because it accounts for a different lag. That is, in PACF lags before the previous one are ignored so the next time point is viewed only by the one immediately prior. These plots look far more similar because they ignore the long cumulative trends and hence tell us a bit more about exclusively the seasonaility. All three plots seem to demonstarte a similar oscillating seasonaility.
 
 ```{r}
 tsenergy[,1] |>
