@@ -42,7 +42,13 @@ library(cowplot)
 ```
 
 ```{r}
-DataPandC <- read_excel("~/Julia_Kagiliery_TSA_Sp24/Data/Table_10.1_Renewable_Energy_Production_and_Consumption_by_Source.xlsx", skip = 10, sheet="Monthly Data",col_names=TRUE) 
+DataPandC <-
+  read_excel(
+    "~/Julia_Kagiliery_TSA_Sp24/Data/Table_10.1_Renewable_Energy_Production_and_Consumption_by_Source.xlsx",
+    skip = 10,
+    sheet = "Monthly Data",
+    col_names = TRUE
+  ) 
 ```
 
 ```{r}
@@ -56,7 +62,7 @@ DataPandC <- DataPandC[-1, , drop = FALSE]
 For each time series, i.e., Renewable Energy Production and Hydroelectric Consumption create three plots: one with time series, one with the ACF and with the PACF. You may use the some code form A2, but I want all the three plots side by side as in a grid.
 (Hint: use function `plot_grid()` from the `cowplot` package)
 
-Set Up:
+#Set Up:
 
 ```{r}
 year1 <- year(DataPandC$Month[1])
@@ -68,71 +74,100 @@ DataPandCTS <- DataPandC[,-1] |>
     ts(start = c(year1,month1), frequency = 12, deltat = 1/12) 
 ```
 
+#Biomass Enegry:
 
-Biomass Enegry:
+inspiration for plot = FLASE from ChatGPT. Prompt: "How do I use plot_grid() with PCF and ACF in R "
 
 ```{r}
-  P1ACF <- Acf(DataPandCTS[,2],lag.max=40,main=paste("Total Biomass Energy \n Production"), plot = FALSE)
-  
-  P2PCF <- Pacf(DataPandCTS[,2],lag.max=40,main=paste("Total Biomass Energy \n Production"), plot = FALSE)
-  
+P1ACF <-
+  Acf(
+    DataPandCTS[, 1],
+    lag.max = 40,
+    main = paste("Biomass Production", label_size = 3),
+    plot = FALSE
+  )
+
+P2PCF <-
+  Pacf(
+    DataPandCTS[, 1],
+    lag.max = 40,
+    main = paste("Biomass Production", label_size = 3),
+    plot = FALSE
+  )
+
 ```
 
 ```{r}
 P1 <- autoplot(P1ACF)
 P2 <- autoplot(P2PCF)
-P3 <- DataPandCTS[,1] |>
+P3 <- DataPandCTS[, 1] |>
   autoplot(color = "darkblue") +
-  ylab("Total Biomass Energy Production [Trillion BTU]") +
+  ylab("Biomass Production") +
   xlab("Year") 
 ```
 
-```{r}
-plot_grid(P1, P2, P3, nrow = 1)
-```
-
-Renewable Energy:
+#Renewable Energy:
 
 ```{r}
-  P4ACF <- Acf(DataPandCTS[,2],lag.max=40,main=paste("Total Renewable Energy \n Production"), plot = FALSE)
-  
-  P5PCF <- Pacf(DataPandCTS[,2],lag.max=40,main=paste("Total Renewable Energy \n Production"), plot = FALSE)
-  
+P4ACF <-
+  Acf(
+    DataPandCTS[, 2],
+    lag.max = 40,
+    main = paste("Renewable Production", label_size = 3),
+    plot = FALSE
+  )
+
+P5PCF <-
+  Pacf(
+    DataPandCTS[, 2],
+    lag.max = 40,
+    main = paste("Renewable Production", label_size = 3),
+    plot = FALSE
+  )
+
 ```
 
 ```{r}
 P4 <- autoplot(P4ACF)
 P5 <- autoplot(P5PCF)
-P6 <- DataPandCTS[,2] |>
-  autoplot(color = "blue") +
-  ylab("Total Renewable Energy Production [Trillion BTU]") +
+P6 <- DataPandCTS[, 2] |>
+  autoplot(color = "blue", label_size = 3) +
+  ylab("Renewable Production") +
   xlab("Year") 
 ```
 
-```{r}
-plot_grid(P4, P5, P6, nrow = 1)
-```
-
-Hydroelectric Energy: 
+#Hydroelectric Energy: 
 
 ```{r}
-  P7ACF <- Acf(DataPandCTS[,3],lag.max=40,main=paste("Total Hydroelectric Energy \n Consumption"), plot = FALSE)
-  
-  P8PCF <- Pacf(DataPandCTS[,3],lag.max=40,main=paste("Total Hydroelectric Energy \n Consumption"), plot = FALSE)
-  
+P7ACF <-
+  Acf(
+    DataPandCTS[, 3],
+    lag.max = 40,
+    main = paste("Hydroelectric Consumption", label_size = 3),
+    plot = FALSE
+  )
+
+P8PCF <-
+  Pacf(
+    DataPandCTS[, 3],
+    lag.max = 40,
+    main = paste("Hydroelectric Consumption", label_size = 3),
+    plot = FALSE
+  )
+
 ```
 
 ```{r}
 P7 <- autoplot(P7ACF)
 P8 <- autoplot(P8PCF)
-P9 <- DataPandCTS[,3] |>
-  autoplot(color = "lightblue") +
-  ylab("Total Hydroelectric Energy Consumption [Trillion BTU]") +
+P9 <- DataPandCTS[, 3] |>
+  autoplot(color = "lightblue", label_size = 3) +
+  ylab("Hydroelectric Consumption") +
   xlab("Year") 
 ```
 
 ```{r}
-plot_grid(P7, P8, P9, nrow = 1)
+plot_grid(P1, P2, P3, P4, P5, P6, P7, P8, P9, nrow = 3, label_size = 3) 
 ```
 
 ### Q2
@@ -142,12 +177,240 @@ It appears as though the total biomass energy production and the total renewable
 
 ### Q3
 Use the *lm()* function to fit a linear trend to the three time series. Ask R to print the summary of the regression. Interpret the regression output, i.e., slope and intercept. Save the regression coefficients for further analysis.
+
+total number of observations = 609
+```{r}
+t <- c(1:609)
+```
+
+
+
+#Trend for Biomass Energy Production:
+```{r}
+DataBiomass <- DataPandC$`Total Biomass Energy Production`
+
+DataBiomass <- ts(DataBiomass)
+
+BiomassTrend = lm(DataBiomass ~ t)
+
+summary(BiomassTrend)
+```
  
+The incertcept for this linear trend: 
+```{r}
+Bbeta0 = as.numeric(BiomassTrend$coefficients[1]) |>
+  print()
+```
+ 
+The slope for this linear trend: 
+```{r}
+Bbeta1 = as.numeric(BiomassTrend$coefficients[2]) |>
+  print()
+```
+ 
+Here, my p-value is less than 0.05 so my coefficient is significant and there is a trend.
+ 
+
+#Trend for Renewable Energy Production:
+```{r}
+DataRenewable <- DataPandC$`Total Renewable Energy Production`
+
+DataRenewable <- ts(DataRenewable) # should this be a time series?
+
+RenewableTrend = lm(DataRenewable ~ t)
+
+summary(RenewableTrend)
+```
+
+The incertcept for this linear trend:
+```{r}
+Rbeta0 = as.numeric(RenewableTrend$coefficients[1]) |>
+  print()
+```
+
+The slope for this linear trend:
+```{r}
+Rbeta1 = as.numeric(RenewableTrend$coefficients[2]) |>
+  print()
+```
+
+Here, my p-value is less than 0.05 so my coefficient is significant and there is a trend.
+
+#Trend for Hyrdoelectric Energy Consumption:
+
+```{r}
+DataHydro <- DataPandC$`Hydroelectric Power Consumption`
+
+DataHydro <- ts(DataHydro)
+
+HydroTrend = lm(DataHydro ~ t)
+
+summary(HydroTrend)
+```
+
+The incertcept for this linear trend:
+```{r}
+Hbeta0 = as.numeric(HydroTrend$coefficients[1]) |>
+  print()
+```
+
+The slope for this linear trend: 
+```{r}
+Hbeta1 = as.numeric(HydroTrend$coefficients[2]) |>
+  print()
+```
+
+Here, my p-value is less than 0.05 so my coefficient is significant and there is a trend.
+
 ### Q4
 Use the regression coefficients from Q3 to detrend the series. Plot the detrended series and compare with the plots from Q1. What happened? Did anything change?
 
+Detrended series = the series - (beta0 + beta1*t)
+
+#Detrended Biomass 
+```{r}
+DataBiomassTrend <- Bbeta0 + (Bbeta1 * t)
+TSDataBiomassTrend <-
+  ts(DataBiomassTrend,
+     start = c(year1, month1),
+     frequency = 12)
+```
+
+```{r}
+DataBiomass <- as.numeric(DataBiomass)
+DataBiomassTrend <- as.numeric(DataBiomassTrend)
+DetrendedBiomass <- DataBiomass - DataBiomassTrend
+DetrendedBiomass <-
+  ts(DetrendedBiomass,
+     start = c(year1, month1),
+     frequency = 12)
+```
+
+```{r}
+DetrendedBiomass |>
+  autoplot(color = "darkblue") +
+  ylab("Total Biomass Energy Production [Trillion BTU]") +
+  xlab("Year") 
+```
+
+
+#Detrended Renewable 
+```{r}
+DataRenewableTrend <- Rbeta0 + (Rbeta1 * t)
+TSDataRenewableTrend <-
+  ts(DataRenewableTrend,
+     start = c(year1, month1),
+     frequency = 12)
+```
+
+```{r}
+DataRenewable <- as.numeric(DataRenewable)
+DataRenewableTrend <- as.numeric(DataRenewableTrend)
+DetrendedRenewable <- DataRenewable - DataRenewableTrend
+DetrendedRenewable <-
+  ts(DetrendedRenewable,
+     start = c(year1, month1),
+     frequency = 12)
+```
+
+```{r}
+DetrendedRenewable |>
+  autoplot(color = "blue") +
+  ylab("Total Renewabke Energy Production [Trillion BTU]") +
+  xlab("Year") 
+```
+
+#Detrended Hydroelectric 
+```{r}
+DataHydroTrend <- Hbeta0 + (Hbeta1 * t)
+TSDataHydroTrend <-
+  ts(DataHydroTrend,
+     start = c(year1, month1),
+     frequency = 12)
+```
+
+```{r}
+DataHydro <- as.numeric(DataRenewable)
+DataHydroTrend <- as.numeric(DataHydroTrend)
+DetrendedHydro <- DataHydro - DataHydroTrend
+DetrendedHydro <-
+  ts(DetrendedHydro,
+     start = c(year1, month1),
+     frequency = 12)
+```
+
+```{r}
+DetrendedHydro |>
+  autoplot(color = "lightblue") +
+  ylab("Total Hydroelectric Energy Consumption [Trillion BTU]") +
+  xlab("Year") 
+```
+
+Yes, the plots did change. For biomass and renewable energy, the range is significantly reduced; that is, the ovbious increase in energy consumption as x (time) approaches September of 2023 is largely eliminated and the data is more closely modeled by a horizontal line. The hydroelectric production data is also different; it seems to have an almost linear increase now which is admittedly strange as the data did not have a super ovbious trend be manipulation. 
+
 ### Q5
 Plot ACF and PACF for the detrended series and compare with the plots from Q1. You may use plot_grid() again to get them side by side. nut mot mandatory. Did the plots change? How?
+
+```{r}
+DBACF <-
+  Acf(
+    DetrendedBiomass,
+    lag.max = 40,
+    main = paste("Total Biomass Energy \n Production"),
+    plot = FALSE
+  )
+
+DBPCF <-
+  Pacf(
+    DetrendedBiomass,
+    lag.max = 40,
+    main = paste("Total Biomass Energy \n Production"),
+    plot = FALSE
+  )
+
+DRACF <-
+  Acf(
+    DetrendedRenewable,
+    lag.max = 40,
+    main = paste("Total Biomass Energy \n Production"),
+    plot = FALSE
+  )
+
+DRPCF <-
+  Pacf(
+    DetrendedRenewable,
+    lag.max = 40,
+    main = paste("Total Biomass Energy \n Production"),
+    plot = FALSE
+  )
+
+DHACF <-
+  Acf(
+    DetrendedHydro,
+    lag.max = 40,
+    main = paste("Total Biomass Energy \n Production"),
+    plot = FALSE
+  )
+
+DHPCF <-
+  Pacf(
+    DetrendedHydro,
+    lag.max = 40,
+    main = paste("Total Biomass Energy \n Production"),
+    plot = FALSE
+  )
+
+
+DB1 <- autoplot(DBACF)
+DB2 <- autoplot(DBPCF)
+DR1 <- autoplot(DRACF)
+DR2 <- autoplot(DRPCF)
+DH1 <- autoplot(DHACF)
+DH2 <- autoplot(DHPCF)
+
+plot_grid(DB1, DB2, DR1, DR2, DH1, DH2, nrow = 3)
+```
+
 
 ## Seasonal Component
 
