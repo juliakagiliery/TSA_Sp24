@@ -138,6 +138,8 @@ plot_grid(P7, P8, P9, nrow = 1)
 ### Q2
 From the plot in Q1, do the series Total Biomass Energy Production, Total Renewable Energy Production, Hydroelectric Power Consumption appear to have a trend? If yes, what kind of trend?
 
+It appears as though the total biomass energy production and the total renewable energy production each have a positive linear trend in that the production increases over time. However, this trend does not seem to be present in total hydroelectric energy consumption. All three time series seem to be influenced by some random and seasonal effects as well. 
+
 ### Q3
 Use the *lm()* function to fit a linear trend to the three time series. Ask R to print the summary of the regression. Interpret the regression output, i.e., slope and intercept. Save the regression coefficients for further analysis.
  
