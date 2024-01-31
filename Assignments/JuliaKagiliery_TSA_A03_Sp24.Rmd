@@ -35,17 +35,19 @@ R packages needed for this assignment:"forecast","tseries", and "Kendall". Insta
 library(forecast)
 library(tseries)
 library(Kendall)
-```
-
-```{r}
+library(ggplot2)
+library(lubridate)
 library(readxl)
-DataPandC <- read_excel("~/Julia_Kagiliery_TSA_Sp24/Data/Table_10.1_Renewable_Energy_Production_and_Consumption_by_Source.xlsx", skip = c(10), sheet="Monthly Data",col_names=TRUE) 
+library(cowplot)
 ```
 
 ```{r}
-DataPandC <- DataPandC[,4:6]
+DataPandC <- read_excel("~/Julia_Kagiliery_TSA_Sp24/Data/Table_10.1_Renewable_Energy_Production_and_Consumption_by_Source.xlsx", skip = 10, sheet="Monthly Data",col_names=TRUE) 
+```
+
+```{r}
+DataPandC <- DataPandC[,c(1,4:6)]
 DataPandC <- DataPandC[-1, , drop = FALSE]
-View(DataPandC)
 ```
 
 ##Trend Component
@@ -54,22 +56,84 @@ View(DataPandC)
 For each time series, i.e., Renewable Energy Production and Hydroelectric Consumption create three plots: one with time series, one with the ACF and with the PACF. You may use the some code form A2, but I want all the three plots side by side as in a grid.
 (Hint: use function `plot_grid()` from the `cowplot` package)
 
+Set Up:
+
 ```{r}
-DataPandCTS <- DataPandC |>
-    ts(start = c(1973,1), frequency = 12, deltat = 1/12) 
+year1 <- year(DataPandC$Month[1])
+month1 <- month(DataPandC$Month[1])
 ```
 
 ```{r}
-#Acf and Pacf for HP1
-for(i in 1:609){
-      par(mfrow=c(1,2))  #place plot side by side
-  Acf(DataPandCTS[,i],lag.max=40,main=paste("Total Biomass Energy Production",i,sep="")) 
-  # because I am not storing Acf() into any object, I don't need to specify plot=TRUE 
-  Pacf(DataPandCTS[,i],lag.max=40,main=paste("Total Biomass Energy Production",i,sep=""))
-}
+DataPandCTS <- DataPandC[,-1] |>
+    ts(start = c(year1,month1), frequency = 12, deltat = 1/12) 
 ```
 
 
+Biomass Enegry:
+
+```{r}
+  P1ACF <- Acf(DataPandCTS[,2],lag.max=40,main=paste("Total Biomass Energy \n Production"), plot = FALSE)
+  
+  P2PCF <- Pacf(DataPandCTS[,2],lag.max=40,main=paste("Total Biomass Energy \n Production"), plot = FALSE)
+  
+```
+
+```{r}
+P1 <- autoplot(P1ACF)
+P2 <- autoplot(P2PCF)
+P3 <- DataPandCTS[,1] |>
+  autoplot(color = "darkblue") +
+  ylab("Total Biomass Energy Production [Trillion BTU]") +
+  xlab("Year") 
+```
+
+```{r}
+plot_grid(P1, P2, P3, nrow = 1)
+```
+
+Renewable Energy:
+
+```{r}
+  P4ACF <- Acf(DataPandCTS[,2],lag.max=40,main=paste("Total Renewable Energy \n Production"), plot = FALSE)
+  
+  P5PCF <- Pacf(DataPandCTS[,2],lag.max=40,main=paste("Total Renewable Energy \n Production"), plot = FALSE)
+  
+```
+
+```{r}
+P4 <- autoplot(P4ACF)
+P5 <- autoplot(P5PCF)
+P6 <- DataPandCTS[,2] |>
+  autoplot(color = "blue") +
+  ylab("Total Renewable Energy Production [Trillion BTU]") +
+  xlab("Year") 
+```
+
+```{r}
+plot_grid(P4, P5, P6, nrow = 1)
+```
+
+Hydroelectric Energy: 
+
+```{r}
+  P7ACF <- Acf(DataPandCTS[,3],lag.max=40,main=paste("Total Hydroelectric Energy \n Consumption"), plot = FALSE)
+  
+  P8PCF <- Pacf(DataPandCTS[,3],lag.max=40,main=paste("Total Hydroelectric Energy \n Consumption"), plot = FALSE)
+  
+```
+
+```{r}
+P7 <- autoplot(P7ACF)
+P8 <- autoplot(P8PCF)
+P9 <- DataPandCTS[,3] |>
+  autoplot(color = "lightblue") +
+  ylab("Total Hydroelectric Energy Consumption [Trillion BTU]") +
+  xlab("Year") 
+```
+
+```{r}
+plot_grid(P7, P8, P9, nrow = 1)
+```
 
 ### Q2
 From the plot in Q1, do the series Total Biomass Energy Production, Total Renewable Energy Production, Hydroelectric Power Consumption appear to have a trend? If yes, what kind of trend?

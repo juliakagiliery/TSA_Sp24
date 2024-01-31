@@ -69,6 +69,11 @@ head(inflow_data)
 Initial time series plot.
 
 ```{r}
+View(inflow_data)
+```
+
+
+```{r}
 #using package ggplot2
 for(i in 1:nhydro){
   print(ggplot(inflow_data, aes(x=my_date, y=inflow_data[,(1+i)])) +
