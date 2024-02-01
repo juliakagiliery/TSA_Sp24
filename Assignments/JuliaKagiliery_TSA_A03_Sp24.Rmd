@@ -71,7 +71,7 @@ month1 <- month(DataPandC$Month[1])
 
 ```{r}
 DataPandCTS <- DataPandC[,-1] |>
-    ts(start = c(year1,month1), frequency = 12, deltat = 1/12) 
+    ts(start = c(year1,month1), frequency = 12) 
 ```
 
 #Biomass Enegry:
@@ -419,13 +419,93 @@ Set aside the detrended series and consider the original series again from Q1 to
 ### Q6
 Just by looking at the time series and the acf plots, do the series seem to have a seasonal trend? No need to run any code to answer your question. Just type in you answer below.
 
+Yes! They all have some kind of repetative oscilations which leads me to believe that there is a seasonal component to my data set. These oscilations seem to occur at regular intervals which leads me to belive they occur at some sort of temporal pattern.
+
 ### Q7
 Use function *lm()* to fit a seasonal means model (i.e. using the seasonal dummies) the two time series. Ask R to print the summary of the regression. Interpret the regression output. From the results which series have a seasonal trend? Do the results match you answer to Q6?
+
+
+```{r}
+Biomass <- DataPandCTS[, 1]
+Renewable <- DataPandCTS[, 2]
+Hydro <- DataPandCTS[, 3]
+
+BiomassDummies <- seasonaldummy(Biomass)
+RenewableDummies <- seasonaldummy(Renewable)
+HydroDummies <- seasonaldummy(Hydro)
+```
+
+```{r}
+SeasonalBiomass = lm(Biomass ~ BiomassDummies) 
+  summary(SeasonalBiomass)
+```
+
+```{r}
+SeasonalRenewable = lm(Renewable ~ RenewableDummies)
+    summary(SeasonalRenewable)
+```
+
+```{r}
+SeasonalHydro = lm(Hydro ~ HydroDummies)
+    summary(SeasonalHydro)
+```
+
+The hydroelectric consumption data is the only data set where p-value < 0.05 so this is the only place where we have a significant seasonal trend. This does not really match my Q6 answer but it is very ovbious that there is a signifacnt seasonal commponent in the hydroelectric data. It is possible that the data can be mostly explianed in the first two plots by random variablity and trends rather than seasonality.
+
+The intercept and coefficents for the seasonal model for the hydroelectric consumption data set are both printed below.
+
+```{r}
+Hbeta_int = as.numeric(SeasonalHydro$coefficients[1]) |>
+  print()
+```
+
+```{r}
+Hbeta_coeff = as.numeric(SeasonalHydro$coefficients[2:12]) |>
+  print()
+```
 
 ### Q8
 Use the regression coefficients from Q7 to deseason the series. Plot the deseason series and compare with the plots from part Q1. Did anything change?
 
+Yes, the plot that is deseasoned looks far more uniform than the natural data.
+
+```{r}
+nobs <- 609
+
+seas_component_Hydro=array(0,nobs)
+for(i in 1:nobs){
+SeasonalHydro[i]=(Hbeta_int + Hbeta_coeff%*%HydroDummies[i,])
+}
+```
+
+```{r}
+ts_SeasonalHydro <- ts(seas_component_Hydro,start=c(year1,month1),frequency=12)
+```
+
+```{r}
+SeasP <- autoplot(ts_SeasonalHydro)
+```
+
+```{r}
+plot_grid(P9, SeasP)
+```
+
+```{r}
+View(ts_SeasonalHydro)
+```
+
+
 ### Q9
 Plot ACF and PACF for the deseason series and compare with the plots from Q1. You may use plot_grid() again to get them side by side. nut mot mandatory. Did the plots change? How?
+
+```{r}
+ Acf(ts_SeasonalHydro,
+    lag.max = 40,
+    main = paste("Hydro Consumption")
+  )
+```
+
+
+
 
 
