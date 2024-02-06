@@ -45,15 +45,26 @@ library(cowplot)
 DataPandC <-
   read_excel(
     "~/Julia_Kagiliery_TSA_Sp24/Data/Table_10.1_Renewable_Energy_Production_and_Consumption_by_Source.xlsx",
-    skip = 10,
+    skip = 12,
     sheet = "Monthly Data",
-    col_names = TRUE
+    col_names = FALSE
   ) 
+
+
+DataPandCNAMES <-
+  read_excel(
+    "~/Julia_Kagiliery_TSA_Sp24/Data/Table_10.1_Renewable_Energy_Production_and_Consumption_by_Source.xlsx",
+    skip = 10,
+    sheet = "Monthly Data", n_max = 1,
+    col_names = FALSE)
+
+colnames(DataPandC) <- DataPandCNAMES
+
+
 ```
 
 ```{r}
 DataPandC <- DataPandC[,c(1,4:6)]
-DataPandC <- DataPandC[-1, , drop = FALSE]
 ```
 
 ##Trend Component
@@ -173,7 +184,7 @@ plot_grid(P1, P2, P3, P4, P5, P6, P7, P8, P9, nrow = 3, label_size = 3)
 ### Q2
 From the plot in Q1, do the series Total Biomass Energy Production, Total Renewable Energy Production, Hydroelectric Power Consumption appear to have a trend? If yes, what kind of trend?
 
-It appears as though the total biomass energy production and the total renewable energy production each have a positive linear trend in that the production increases over time. However, this trend does not seem to be present in total hydroelectric energy consumption. All three time series seem to be influenced by some random and seasonal effects as well. 
+It appears as though the total biomass energy production and the total renewable energy production each have a positive linear trend in that the production increases over time. However, this trend does not seem to be present in total hydroelectric energy consumption. All three time series seem to be influenced by some random and seasonal effects as well. The becomes apparent in the ACF plots in which there is still a relatively high value after many lags. 
 
 ### Q3
 Use the *lm()* function to fit a linear trend to the three time series. Ask R to print the summary of the regression. Interpret the regression output, i.e., slope and intercept. Save the regression coefficients for further analysis.
@@ -182,7 +193,6 @@ total number of observations = 609
 ```{r}
 t <- c(1:609)
 ```
-
 
 
 #Trend for Biomass Energy Production:
@@ -196,7 +206,7 @@ BiomassTrend = lm(DataBiomass ~ t)
 summary(BiomassTrend)
 ```
  
-The incertcept for this linear trend: 
+The intercept for this linear trend: 
 ```{r}
 Bbeta0 = as.numeric(BiomassTrend$coefficients[1]) |>
   print()
@@ -261,6 +271,8 @@ Hbeta1 = as.numeric(HydroTrend$coefficients[2]) |>
 ```
 
 Here, my p-value is less than 0.05 so my coefficient is significant and there is a trend.
+
+For all three time series, there apears to be at least some trend so I can fit a somewhat-meaningful model.
 
 ### Q4
 Use the regression coefficients from Q3 to detrend the series. Plot the detrended series and compare with the plots from Q1. What happened? Did anything change?
@@ -330,7 +342,7 @@ TSDataHydroTrend <-
 ```
 
 ```{r}
-DataHydro <- as.numeric(DataRenewable)
+DataHydro <- as.numeric(DataHydro)
 DataHydroTrend <- as.numeric(DataHydroTrend)
 DetrendedHydro <- DataHydro - DataHydroTrend
 DetrendedHydro <-
@@ -346,7 +358,8 @@ DetrendedHydro |>
   xlab("Year") 
 ```
 
-Yes, the plots did change. For biomass and renewable energy, the range is significantly reduced; that is, the ovbious increase in energy consumption as x (time) approaches September of 2023 is largely eliminated and the data is more closely modeled by a horizontal line. The hydroelectric production data is also different; it seems to have an almost linear increase now which is admittedly strange as the data did not have a super ovbious trend be manipulation. 
+Yes, the plots did change. For the three data points, the range of values is  reduced; that is, the ovbious increase in energy BTU as x (time) approaches September of 2023 is largely eliminated and the data more closely oscilates around a horizontal line.  
+
 
 ### Q5
 Plot ACF and PACF for the detrended series and compare with the plots from Q1. You may use plot_grid() again to get them side by side. nut mot mandatory. Did the plots change? How?
@@ -450,7 +463,7 @@ SeasonalHydro = lm(Hydro ~ HydroDummies)
     summary(SeasonalHydro)
 ```
 
-The hydroelectric consumption data is the only data set where p-value < 0.05 so this is the only place where we have a significant seasonal trend. This does not really match my Q6 answer but it is very ovbious that there is a signifacnt seasonal commponent in the hydroelectric data. It is possible that the data can be mostly explianed in the first two plots by random variablity and trends rather than seasonality.
+The hydroelectric consumption data is the only data set where p-value < 0.05 so this is the only place where we have a significant seasonal trend. This does not really match my Q6 answer but it is very ovbious that there is a signifacnt seasonal commponent in the hydroelectric data. It is possible that the data can be mostly explianed in the first two plots by random variablity and trend rather than seasonality. Furthermore, there are many different kinds of possible models for seasonality that may produce better results.
 
 The intercept and coefficents for the seasonal model for the hydroelectric consumption data set are both printed below.
 
@@ -474,7 +487,7 @@ nobs <- 609
 
 seas_component_Hydro=array(0,nobs)
 for(i in 1:nobs){
-SeasonalHydro[i]=(Hbeta_int + Hbeta_coeff%*%HydroDummies[i,])
+seas_component_Hydro[i]=(Hbeta_int + Hbeta_coeff%*%HydroDummies[i,])
 }
 ```
 
@@ -483,29 +496,38 @@ ts_SeasonalHydro <- ts(seas_component_Hydro,start=c(year1,month1),frequency=12)
 ```
 
 ```{r}
-SeasP <- autoplot(ts_SeasonalHydro)
+DeseasonHydro <- Hydro - ts_SeasonalHydro
+```
+
+```{r}
+SeasP <- autoplot(DeseasonHydro)
 ```
 
 ```{r}
 plot_grid(P9, SeasP)
 ```
 
-```{r}
-View(ts_SeasonalHydro)
-```
-
-
 ### Q9
 Plot ACF and PACF for the deseason series and compare with the plots from Q1. You may use plot_grid() again to get them side by side. nut mot mandatory. Did the plots change? How?
 
+Yes the plots changes! The value of the ACF and PACF are significantly decreased and approach 0 as the lags go on which is a huge change.
+
 ```{r}
- Acf(ts_SeasonalHydro,
+ Acf(DeseasonHydro,
     lag.max = 40,
     main = paste("Hydro Consumption")
   )
 ```
 
+```{r}
+ Pacf(DeseasonHydro,
+    lag.max = 40,
+    main = paste("Hydro Consumption")
+  )
+```
 
+ACF: there is a trend
+PACF: value of the coefficient 
 
 
 
