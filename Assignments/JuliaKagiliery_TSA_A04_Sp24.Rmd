@@ -44,6 +44,16 @@ RenewableProduction <- RenewableProduction[-1,] |>
   select(`Total Renewable Energy Production`)
 ```
 
+```{r}
+RenewableProduction <- ts(RenewableProduction, start = c(year1, month1),
+     frequency = 12)
+```
+
+```{r}
+RenewableProductionPlot <- autoplot(RenewableProduction)
+```
+
+
 ## Stochastic Trend and Stationarity Tests
 
 ### Q1
@@ -55,14 +65,39 @@ Difference the "Total Renewable Energy Production" series using function diff().
 Try differencing at lag 1 only once, i.e., make `lag=1` and `differences=1`. Plot the differenced series Do the series still seem to have trend?
 
 ```{r}
-diff(RenewableProduction, 1, 1)
+RenewableProductiondiff <- diff(RenewableProduction, 1, 1)
+```
+
+```{r}
+RenewableProductiondiffPlot <- plot(RenewableProductiondiff)
 ```
 
 ### Q2
 Copy and paste part of your code for A3 where you run the regression for Total Renewable Energy Production and subtract that from the orinal series. This should be the code for Q3 and Q4. make sure you use the same name for you time series object that you had in A3.
 
 ```{r}
+t <- c(1:609)
+RenewableTrend = lm(RenewableProduction ~ t)
+Rbeta0 = as.numeric(RenewableTrend$coefficients[1])
+Rbeta1 = as.numeric(RenewableTrend$coefficients[2]) 
+DataRenewableTrend <- Rbeta0 + (Rbeta1 * t)
+```
 
+```{r}
+RenewableProduction <- as.numeric(RenewableProduction)
+DataRenewableTrend <- as.numeric(DataRenewableTrend)
+DetrendedRenewable <- RenewableProduction - DataRenewableTrend
+DetrendedRenewable <-
+  ts(DetrendedRenewable,
+     start = c(year1, month1),
+     frequency = 12)
+```
+
+```{r}
+DetrendedRenewablePlot <- DetrendedRenewable |>
+  autoplot(color = "blue") +
+  ylab("Total Renewabke Energy Production [Trillion BTU]") +
+  xlab("Year") 
 ```
 
 ### Q3
@@ -70,10 +105,14 @@ Now let's compare the differenced series with the detrended series you calculate
 
 Using autoplot() + autolayer() create a plot that shows the three series together. Make sure your plot has a legend. The easiest way to do it is by adding the `series=` argument to each autoplot and autolayer function. Look at the key for A03 for an example. 
 
+Three series: as is, detrended, differenced
+
 ```{r}
-
-
+DetrendedRenewablePlot
+RenewableProductiondiffPlot
+RenewableProductionPlot
 ```
+
 
 ### Q4
 Plot the ACF for the three series and compare the plots. Add the argument `ylim=c(-0.5,1)` to the autoplot() or Acf() function - whichever you are using to generate the plots - to make sure all three y axis have the same limits. Which method do you think was more efficient in eliminating the trend? The linear regression or differencing?
