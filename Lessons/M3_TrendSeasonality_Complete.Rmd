@@ -263,6 +263,9 @@ ggplot(inflow_data_new_yearly, aes(x=my_year, y=inflow_data_yearly)) +
 
 ```
 
+
+
+
 ### Mann Kendall 
 
 Check for deterministic trend.

@@ -1,10 +1,12 @@
 ---
 title: "ENV 790.30 - Time Series Analysis for Energy Data | Spring 2024"
-subtitle: "Assignment 4 - Due date 02/12/24"
 author: "Julia Kagiliery"
-output: pdf_document
+subtitle: "Assignment 4 - Due date 02/12/24"
+output:
+  pdf_document: default
+  word_document: default
 geometry: margin=2.54cm
-editor_options: 
+editor_options:
   chunk_output_type: console
 ---
   
@@ -27,6 +29,7 @@ library(forecast)
 library(tseries)
 library(Kendall)
 library(dplyr)
+library(cowplot)
 ```
 
 ## Questions 
@@ -40,17 +43,23 @@ RenewableProduction <- read_excel("~/Julia_Kagiliery_TSA_Sp24/Data/Table_10.1_Re
 ```
 
 ```{r}
+RenewableProductionDates <- RenewableProduction[-1,1]
+```
+
+```{r}
 RenewableProduction <- RenewableProduction[-1,] |>
   select(`Total Renewable Energy Production`)
 ```
 
 ```{r}
+year1 <- 1973
+month1<- 1
 RenewableProduction <- ts(RenewableProduction, start = c(year1, month1),
      frequency = 12)
 ```
 
 ```{r}
-RenewableProductionPlot <- autoplot(RenewableProduction)
+autoplot(RenewableProduction)
 ```
 
 
@@ -108,9 +117,27 @@ Using autoplot() + autolayer() create a plot that shows the three series togethe
 Three series: as is, detrended, differenced
 
 ```{r}
-DetrendedRenewablePlot
-RenewableProductiondiffPlot
-RenewableProductionPlot
+DetrendedRenewable <-
+  ts(DetrendedRenewable,
+     start = c(year1, month1),
+     frequency = 12)
+
+RenewableProduction <-
+  ts(RenewableProduction,
+     start = c(year1, month1),
+     frequency = 12)
+
+RenewableProductiondiff <-
+  ts(RenewableProductiondiff,
+     start = c(year1, month1),
+     frequency = 12)
+
+autoplot(RenewableProduction,series="Original") +
+autolayer(DetrendedRenewable,series="Detrended") +
+  autolayer(RenewableProductiondiff,series="Differenced") +
+ylab("Energy [Trillion Btu]") +
+ggtitle("Total Renewable Energy Production")
+
 ```
 
 
@@ -118,18 +145,34 @@ RenewableProductionPlot
 Plot the ACF for the three series and compare the plots. Add the argument `ylim=c(-0.5,1)` to the autoplot() or Acf() function - whichever you are using to generate the plots - to make sure all three y axis have the same limits. Which method do you think was more efficient in eliminating the trend? The linear regression or differencing?
 
 ```{r}
-
-
+P2 <-autoplot(Acf(DetrendedRenewable, lag.max = 40, ylim=c(-0.5,1), plot = FALSE))
+P1 <- autoplot(Acf(RenewableProduction, lag.max = 40, ylim=c(-0.5,1), plot = FALSE))
+P3 <- autoplot(Acf(RenewableProductiondiff, lag.max = 40, ylim=c(-0.5,1), plot = FALSE))
 ```
 
+```{r}
+plot_grid(P1, P2, P3, nrow = 1)
+```
+
+The differenced ACF seems to look promising as is has relatively few spikes beyond the blue dashed significance lines. The Detrended ACF also looks better as it is downward sloping with lower values and some regular spikes at 12-month intervals.
 
 ### Q5
 Compute the Seasonal Mann-Kendall and ADF Test for the original "Total Renewable Energy Production" series. Ask R to print the results. Interpret the results for both test. What is the conclusion from the Seasonal Mann Kendall test? What's the conclusion for the ADF test? Do they match what you observed in Q3 plot? Recall that having a unit root means the series has a stochastic trend. And when a series has stochastic trend we need to use a different procedure to remove the trend.
 
 ```{r}
-
-
+print("Results for ADF test/n")
+print(adf.test(RenewableProduction,alternative = "stationary"))
 ```
+The p-value for this ADF is 0.1095 hence we fail to reject the null hypothesis that the data is not stationary. In this case, it seems like our data is not stationary.
+
+```{r}
+SMKtest <- SeasonalMannKendall(RenewableProduction)
+print("Results for Seasonal Mann Kendall /n")
+print(summary(SMKtest))
+```
+The p-value for this test is ~0 hence we reject the null hypothesis and belive that there is a trend.
+
+This looks about right compared to Q3; the original data is definitely trended and seasonal.  
 
 
 ### Q6
@@ -137,13 +180,68 @@ Aggregate the original "Total Renewable Energy Production" series by year. You c
 
 ```{r}
 
+RenewableProduction_year <- as.integer(format(time(RenewableProduction)))
+RenewableProduction_month <- as.integer(format(time(RenewableProduction)))
+#chat GPT prompt related to error for the type of date variable
+
+# There has got to be a better way to do this
+RenewableProduction_data <- data.frame(
+  Year = RenewableProduction_year, 
+  Month = RenewableProduction_month, 
+  Production = as.numeric((RenewableProduction))
+)
+
+# Aggregate the series by year and month
+RenewableProduction_matrix <- matrix(
+  RenewableProduction_data$Production, 
+  nrow = 12, byrow = FALSE
+)
+
+# Take the column mean for each year
+RenewableProduction_yearly_mean <- colMeans(RenewableProduction_matrix)
+
+# Convert the yearly mean series into a time series object
+RenewableProduction_time_series <- ts(
+  RenewableProduction_yearly_mean, 
+  start = year1, 
+  frequency = 1
+)
+
+autoplot(RenewableProduction_time_series, 
+         main = "Total Renewable Energy Production (Yearly Mean)", 
+         xlab = "Year", ylab = "Mean Production")
 ```
+
 
 ### Q7
 Apply the Mann Kendal, Spearman correlation rank test and ADF. Are the results from the test in agreement with the test results for the monthly series, i.e., results for Q6?
 
 ```{r}
+print("Results for ADF test/n")
+print(adf.test(RenewableProduction_time_series,alternative = "stationary"))
+```
+The ADF p-value is ~0.1665
 
+
+```{r}
+SMKtest2 <- SeasonalMannKendall(RenewableProduction_time_series)
+print("Results for Seasonal Mann Kendall /n")
+print(summary(SMKtest2))
+```
+The p-value is ~0
+
+```{r}
+my_year <- RenewableProduction_data$Year
+my_year <- unique(RenewableProduction_data$Year)
+sp_rho <- cor(RenewableProduction_time_series, my_year, method = "spearman")
+print("Results from Spearman Correlation:")
+print(sp_rho)
 ```
 
-
+```{r}
+sp_rho1=cor.test(RenewableProduction_time_series, my_year, method = "spearman")
+print(sp_rho1)
+```
+ The rho correlation value is 0.9102262 and the p-value is ~0
+ 
+ There still seems to be a positive trend on this data.
