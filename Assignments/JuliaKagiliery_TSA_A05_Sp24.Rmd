@@ -30,7 +30,7 @@ library(ggplot2)
 library(Kendall)
 library(lubridate)
 library(tidyverse)
-library(cowplot)#load this package so yon clean the data frame using pipes
+library(cowplot)
 ```
 
 ## Decomposing Time Series
@@ -42,8 +42,13 @@ Consider the same data you used for A04 from the spreadsheet "Table_10.1_Renewab
 energy_data <- read_excel("~/Julia_Kagiliery_TSA_Sp24/Data/Table_10.1_Renewable_Energy_Production_and_Consumption_by_Source.xlsx", 
     skip = 9)
 energy_data <- energy_data[-1,]
-
 ```
+
+```{r}
+view(energy_data)
+```
+
+start= 1973
 
 ### Q1
 
@@ -58,6 +63,8 @@ energy_data <- energy_data |>
      `Solar Energy Consumption` != "Not Available",
      `Wind Energy Consumption` != "Not Available")
 
+energy_data <- na.omit(energy_data)
+
 energy_data <- energy_data |>
    mutate(
      `Solar Energy Consumption` = as.numeric(`Solar Energy Consumption`),
@@ -67,10 +74,6 @@ energy_data <- energy_data |>
 ```
 
 Chat GPT prompt for ymd(): how to use my() function for date conversions
-
-```{r}
-typeof(energy_data$Month)
-```
 
 ```{r}
 nobs=nrow(energy_data)
@@ -114,7 +117,7 @@ energy_data |>
   geom_line() +
   geom_line(aes(x = Month, color = factor("Solar"), y = `Solar Energy Consumption`)) +
   scale_x_date(date_breaks = "5 years", date_labels = "%Y") +
-  ylab("Energy Consumption (Trillion BTU)") +
+  ylab("Energy Consumption") +
   xlab("Year") +
   scale_color_manual(name = "Energy Source", values = c("Wind" = "blue", "Solar" = "red"))
 ```
@@ -149,25 +152,76 @@ Additional info on `decompose()`.
 
 Transform wind and solar series into a time series object and apply the decompose function on them using the additive option, i.e., `decompose(ts_data, type = "additive")`. What can you say about the trend component? What about the random component? Does the random component look random? Or does it appear to still have some seasonality on it?
 
+> Answer: The trend componet looks about how I would expect it: increasing. However, the random component does not look random at all; there certainly seems to be some seasonaility left. The random plots almost seem to imply that data before 2012 is one model and data after 2012 is a totally different one.  
+
 ```{r}
-print(decompose(WindTS, type = "additive"))
+Q4WindTrend <- decompose(WindTS, type = "additive")
 ```
 
 ```{r}
-print(decompose(SolarTS, type = "additive"))
+autoplot(Q4WindTrend$seasonal)
 ```
 
+```{r}
+autoplot(Q4WindTrend$trend)
+```
+
+```{r}
+autoplot(Q4WindTrend$random)
+```
+
+```{r}
+Q4SolarTrend <- print(decompose(SolarTS, type = "additive"))
+```
+
+```{r}
+autoplot(Q4SolarTrend$seasonal)
+```
+
+```{r}
+autoplot(Q4SolarTrend$trend)
+```
+
+```{r}
+autoplot(Q4SolarTrend$random)
+```
 
 ### Q5
 
 Use the decompose function again but now change the type of the seasonal component from additive to multiplicative. What happened to the random component this time?
 
+> Answer: The random component looks better this time (expecially for wind) as there is more randomness to the plot and hence less evidence of seasonaility. There is still some indication that the timefram should be fractionated for models.
+
 ```{r}
-print(decompose(WindTS, type = "multiplicative"))
+Q5Wind <- decompose(WindTS, type = "multiplicative")
 ```
 
 ```{r}
-print(decompose(SolarTS, type = "multiplicative"))
+autoplot(Q5Wind$seasonal)
+```
+
+```{r}
+autoplot(Q5Wind$trend)
+```
+
+```{r}
+autoplot(Q5Wind$random)
+```
+
+```{r}
+Q5Solar <- decompose(SolarTS, type = "multiplicative")
+```
+
+```{r}
+autoplot(Q5Solar$seasonal)
+```
+
+```{r}
+autoplot(Q5Solar$trend)
+```
+
+```{r}
+autoplot(Q5Solar$random)
 ```
 
 ```{r}
@@ -182,7 +236,7 @@ autoplot(SolarTS)
 
 When fitting a model to this data, do you think you need all the historical data? Think about the data from 90s and early 20s. Are there any information from those years we might need to forecast the next six months of Solar and/or Wind consumption. Explain your response.
 
-> Answer: No, not neccessary. 
+> Answer: No, I do not think all of the historic data is neccessary. There have been many factors over time like increased environmental awareness, technology improvemnets as well as cost reductions in solar and wind technology all of whihc have fundamentally changed the way we consumer solar and wind energy. Hence, it is probably better to look at the last year or two to predict the next six months as the technology from 1 or 2 years ago is far similar to the systems we are using today than infomration/technology from 30 years ago.  
 
 ### Q7
 
@@ -211,16 +265,19 @@ TSFilterSolar <- ts(FilterSolar, start = c(2012, 1), frequency = 12)
 ```
 
 ```{r}
-original_start_date <- start(TSFilterWind)
-print(original_start_date)
+Q6Wind <- decompose(TSFilterWind, type = "additive")
 ```
 
 ```{r}
-print(decompose(TSFilterWind, type = "additive"))
+Q6Solar <- decompose(TSFilterSolar, type = "additive")
 ```
 
 ```{r}
-print(decompose(TSFilterSolar, type = "additive"))
+autoplot(Q6Solar$random)
+```
+
+```{r}
+autoplot(Q6Wind$random)
 ```
 
 ```{r}
@@ -231,7 +288,7 @@ autoplot(TSFilterSolar)
 autoplot(TSFilterWind)
 ```
 
-> Answer:
+> Answer: The random components do look much better here and are far more random; there are no distinguishable patterns that emerge year to year. Of course, this will never be completely ranomd as we expect some noise in everydata set but this version of the data is the best explained by the model so far.  
 
 ## Identify and Remove outliers
 
@@ -239,7 +296,7 @@ autoplot(TSFilterWind)
 
 Apply the `tsclean()` to both series from Q7. Did the function removed any outliers from the series? Hint: Use `autoplot()` to check if there is difference between cleaned series and original series.
 
-whole data set!
+> Answer:When considering substantial historical data in the data set, a ton of outliers are removed for solar and wind (you know this because the two trends are nit super imposed). There seem to be a variety of factors (like new technology and increased environmnetal awareness) that have changed the energy consumption in these two categories. The variability across time tells us that historic data may not be the best predictor of current and future uses. 
 
 ```{r}
 CleanWindTS <-tsclean(WindTS)
@@ -250,23 +307,15 @@ CleanSolarTS <- tsclean(SolarTS)
 ```
 
 ```{r}
-p1 <- autoplot(CleanWindTS)
+autoplot(SolarTS, series="Solar Raw") +
+  autolayer(CleanSolarTS, series="Solar Clean") +
+  ylab("Energy Consumption") 
 ```
 
 ```{r}
-p2 <- autoplot(CleanSolarTS)
-```
-
-```{r}
-p3 <- autoplot(WindTS)
-```
-
-```{r}
-p4 <- autoplot(SolarTS)
-```
-
-```{r}
-plot_grid(p1, p3, p2, p4, nrow = 2)
+autoplot(WindTS, series="Wind Raw") +
+  autolayer(CleanWindTS, series="Wind Clean") +
+  ylab("Energy Consumption") 
 ```
 
 ### Q9
@@ -274,7 +323,8 @@ plot_grid(p1, p3, p2, p4, nrow = 2)
 Redo number Q8 but now with the time series you created on Q7, i.e., the series starting in 2014. Using what `autoplot()` again what happened now?Did the function removed any outliers from the series?
 After 2012
 
-> Answer:
+> Answer: With the series including data only from 2012 on, there were very few outliers removed in the solar data (right around Janurary of 2022 and 2023) but otherwise no data was removed (the two series are almost completely superimposed). This seems to show that it is better/ more predicatble to look at data around the same time rather than using largerly historic data. 
+
 
 ```{r}
 TSCWind <- tsclean(TSFilterWind)
@@ -282,12 +332,14 @@ TSCSolar <- tsclean(TSFilterSolar)
 ```
 
 ```{r}
-p5 <- autoplot(TSCSolar)
-p6 <- autoplot(TSCWind)
-p7 <- autoplot(TSFilterWind)
-p8 <- autoplot(TSFilterSolar)
+autoplot(TSFilterSolar, series="Solar Raw") +
+  autolayer(TSCSolar, series="Solar Clean") +
+  ylab("Energy Consumption") 
 ```
 
 ```{r}
-plot_grid(p5, p8, p6, p7, nrow = 2)
+autoplot(TSFilterWind, series="Wind Raw") +
+  autolayer(TSCWind, series="Wind Clean") +
+  ylab("Energy Consumption") 
 ```
+
