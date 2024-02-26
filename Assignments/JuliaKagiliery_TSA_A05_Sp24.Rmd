@@ -44,11 +44,6 @@ energy_data <- read_excel("~/Julia_Kagiliery_TSA_Sp24/Data/Table_10.1_Renewable_
 energy_data <- energy_data[-1,]
 ```
 
-```{r}
-view(energy_data)
-```
-
-start= 1973
 
 ### Q1
 
